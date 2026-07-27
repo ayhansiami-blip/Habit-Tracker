@@ -1,4 +1,12 @@
-while True:
+import json
+import os
+file_path = "habit.json"
+if os.path.exists(file_path):
+    with open("habits.json", "w", encoding="utf-8") as file:
+        data = json.load(file)
+else:
+    data = {}
+
     choice = input('''
 ===== Habit Tracker =====
 
@@ -15,11 +23,15 @@ Choose an option: ''')
         habit_name = habit_name.lower()
         if habit_name.strip() == '':
             print('Your habit name cannot be empty...')
-        if len(habit_name.strip()) < 3:
+        elif len(habit_name.strip()) < 3:
             print('Your habit name cannot be less then 3 chracters...')
-        if len(habit_name.strip()) > 30:
+        elif len(habit_name.strip()) > 30:
             print('Your habit name cannot be more then 30 charaters...')
-
+        else:
+            with open("habits.json", "a", encoding="utf-8") as file:
+                data['habits'] = habit_name
+                json.dump(data, file, indent=4)
+                print(data)
     elif choice == '2':
         print('<< View Habits >>')
     elif choice == '3':
