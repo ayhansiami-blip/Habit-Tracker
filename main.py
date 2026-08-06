@@ -6,8 +6,8 @@ if os.path.exists(file_path):
         data = json.load(file)
 else:
     data = {}
+
     with open("habits.json", "w", encoding="utf-8") as file:
-        data = {}
         json.dump(data, file)
 
 while True:
@@ -32,10 +32,15 @@ Choose an option: ''')
         elif len(habit_name) > 30:
             print('Your habit name cannot be more then 30 charaters...')
         else:
-            with open("habits.json", "w", encoding="utf-8") as file:
-                data['habits'] = habit_name
-                json.dump(data, file, indent=4)
-                print(data)
+            if 'habits' not in data:
+                data['habits'] = []
+            if habit_name in data['habits']:
+                print('This habit already exists! ')
+                data['habits'].append(habit_name)
+
+                with open("habits.json", "w", encoding="utf-8") as file:
+                    json.dump(data, file, indent=4)
+                print(f'Habit {habit_name} has been added!')
     elif choice == '2':
         print('<< View Habits >>')
     elif choice == '3':
@@ -43,4 +48,6 @@ Choose an option: ''')
     elif choice == '4':
         print('<< Statistics >>')
     elif choice == '5':
-        print('Exit')
+        print('<< Exit >>')
+        print('Thank you for using my program :) ')
+        break
