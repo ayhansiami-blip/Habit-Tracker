@@ -10,6 +10,20 @@ else:
     with open(file_path, "w", encoding="utf-8") as file:
         json.dump(data, file)
 
+
+def get_continue_choice():
+    while True:
+        continue_choice_input = input(
+            'Would you like to continue? (Y/N) ')
+        continue_choice_input = continue_choice_input.lower()
+        if continue_choice_input == 'y':
+            return continue_choice_input
+        elif continue_choice_input == 'n':
+            return continue_choice_input
+        else:
+            print('Didn\'t get that... Please try again...')
+
+
 while True:
     choice = input('''
 ===== Habit Tracker =====
@@ -51,18 +65,6 @@ Choose an option: ''')
 
     elif choice == '3':
         print('<< Search Habit >>')
-
-        def continue_choice():
-            while True:
-                continue_choice_input = input(
-                    'Would you like to continue? (Y/N) ')
-                continue_choice_input = continue_choice_input.lower()
-                if continue_choice_input == 'y':
-                    return continue_choice_input
-                elif continue_choice_input == 'n':
-                    return continue_choice_input
-                else:
-                    print('Didn\'t get that... Please try again...')
         if not data['habits']:
             print('you don\'t have any habits yet...')
         else:
@@ -72,20 +74,21 @@ Choose an option: ''')
 
                 if search_input in data['habits']:
                     print(f'Habit {search_input} found! ')
-                    continue_choice_input = continue_choice()
+                    continue_choice_input = get_continue_choice()
                     if continue_choice_input == 'y':
                         continue
                     elif continue_choice_input == 'n':
                         break
                 else:
                     print('Habit not found! ')
-                    continue_choice_input = continue_choice()
+                    continue_choice_input = get_continue_choice()
                     if continue_choice_input == 'y':
                         continue
                     elif continue_choice_input == 'n':
                         break
     elif choice == '4':
         print('<< Statistics >>')
+        print(f'Total Habits: {len(data['habits'])}')
     elif choice == '5':
         print('<< Exit >>')
         print('Thank you for using my program :) ')
