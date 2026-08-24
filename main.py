@@ -7,8 +7,17 @@ except json.JSONDecodeError:
     print("The data file is corrupted. Starting with an empty habit list...")
     data = {}
 
+
+def save_data(habit_name=None):
+    if habit_name:
+        data['habits'].append(habit_name)
     with open(file_path, "w", encoding="utf-8") as file:
-        json.dump(data, file)
+        json.dump(data, file, indent=4)
+
+
+if 'habits' not in data:
+    data['habits'] = []
+    save_data()
 
 
 def get_continue_choice():
@@ -47,15 +56,11 @@ Choose an option: ''')
             elif len(habit_name) > 30:
                 print('Your habit name cannot be more then 30 charaters...')
             else:
-                if 'habits' not in data:
-                    data['habits'] = []
                 if habit_name in data['habits']:
                     print(
                         'This habit already exists! Please enter a different habit name.')
                 else:
-                    with open(file_path, "w", encoding="utf-8") as file:
-                        data['habits'].append(habit_name)
-                        json.dump(data, file, indent=4)
+                    save_data()
                     print(f'Habit {habit_name} has been added!')
                     break
     elif choice == '2':
@@ -68,8 +73,8 @@ Choose an option: ''')
 
     elif choice == '3':
         print('<< Search Habit >>')
-        if 'habits' not in data or not data['habits']:
-            print('you don\'t have any habits yet...')
+        if not data['habits']:
+            print('You don\'t have any habits yet...')
         else:
             while True:
                 search_input = input('Enter your habit: ')
@@ -78,16 +83,12 @@ Choose an option: ''')
                 if search_input in data['habits']:
                     print(f'Habit {search_input} found! ')
                     continue_choice_input = get_continue_choice()
-                    if continue_choice_input == 'y':
-                        continue
-                    elif continue_choice_input == 'n':
+                    if continue_choice_input == 'n':
                         break
                 else:
                     print('Habit not found! ')
                     continue_choice_input = get_continue_choice()
-                    if continue_choice_input == 'y':
-                        continue
-                    elif continue_choice_input == 'n':
+                    if continue_choice_input == 'n':
                         break
     elif choice == '4':
         print('<< Statistics >>')
