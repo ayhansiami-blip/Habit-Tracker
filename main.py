@@ -1,10 +1,11 @@
 import json
 import os
 file_path = "habits.json"
-if os.path.exists(file_path):
+try:
     with open(file_path, "r", encoding="utf-8") as file:
         data = json.load(file)
-else:
+except json.JSONDecodeError:
+    print("The data file is corrupted. Starting with an empty habit list...")
     data = {}
 
     with open(file_path, "w", encoding="utf-8") as file:
@@ -37,24 +38,27 @@ while True:
 Choose an option: ''')
     if choice == '1':
         print(' << Add Habit >>')
-        habit_name = input('Enter Habit Name: ')
-        habit_name = habit_name.title().strip()
-        if habit_name == '':
-            print('Your habit name cannot be empty...')
-        elif len(habit_name) < 3:
-            print('Your habit name cannot be less then 3 chracters...')
-        elif len(habit_name) > 30:
-            print('Your habit name cannot be more then 30 charaters...')
-        else:
-            if 'habits' not in data:
-                data['habits'] = []
-            if habit_name in data['habits']:
-                print('This habit already exists! ')
+        while True:
+            habit_name = input('Enter Habit Name: ')
+            habit_name = habit_name.title().strip()
+            if habit_name == '':
+                print('Your habit name cannot be empty...')
+            elif len(habit_name) < 3:
+                print('Your habit name cannot be less then 3 chracters...')
+            elif len(habit_name) > 30:
+                print('Your habit name cannot be more then 30 charaters...')
             else:
-                with open(file_path, "w", encoding="utf-8") as file:
-                    data['habits'].append(habit_name)
-                    json.dump(data, file, indent=4)
-                print(f'Habit {habit_name} has been added!')
+                if 'habits' not in data:
+                    data['habits'] = []
+                if habit_name in data['habits']:
+                    print(
+                        'This habit already exists! Please enter a different habit name.')
+                else:
+                    with open(file_path, "w", encoding="utf-8") as file:
+                        data['habits'].append(habit_name)
+                        json.dump(data, file, indent=4)
+                    print(f'Habit {habit_name} has been added!')
+                    break
     elif choice == '2':
         print('<< View Habits >>')
         if not data['habits']:
@@ -65,7 +69,7 @@ Choose an option: ''')
 
     elif choice == '3':
         print('<< Search Habit >>')
-        if not data['habits']:
+        if 'habits' not in data or not data['habits']:
             print('you don\'t have any habits yet...')
         else:
             while True:
@@ -88,7 +92,7 @@ Choose an option: ''')
                         break
     elif choice == '4':
         print('<< Statistics >>')
-        print(f'Total Habits: {len(data['habits'])}')
+        print(f'Total Habits: {len(data["habits"])}')
     elif choice == '5':
         print('<< Exit >>')
         print('Thank you for using my program :) ')
