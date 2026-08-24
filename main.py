@@ -1,5 +1,4 @@
 import json
-import os
 file_path = "habits.json"
 try:
     with open(file_path, "r", encoding="utf-8") as file:
@@ -14,13 +13,13 @@ except json.JSONDecodeError:
 
 def get_continue_choice():
     while True:
-        continue_choice_input = input(
+        user_input = input(
             'Would you like to continue? (Y/N) ')
-        continue_choice_input = continue_choice_input.lower()
-        if continue_choice_input == 'y':
-            return continue_choice_input
-        elif continue_choice_input == 'n':
-            return continue_choice_input
+        user_input = user_input.lower()
+        if user_input == 'y':
+            return user_input
+        elif user_input == 'n':
+            return user_input
         else:
             print('Didn\'t get that... Please try again...')
 
@@ -97,3 +96,5 @@ Choose an option: ''')
         print('<< Exit >>')
         print('Thank you for using my program :) ')
         break
+    else:
+        print('Invalid choice! Please try again...')
