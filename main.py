@@ -6,7 +6,11 @@ try:
 except json.JSONDecodeError:
     print("The data file is corrupted. Starting with an empty habit list...")
     data = {}
-
+    data["habits"] = []
+except FileNotFoundError:
+    print("The data file does not exist. Starting with an empty habit list...")
+    data = {}
+    data["habits"] = []
 
 def save_data(habit_name=None):
     """
@@ -19,11 +23,27 @@ def save_data(habit_name=None):
         data['habits'].append(habit_name)
     with open(file_path, "w", encoding="utf-8") as file:
         json.dump(data, file, indent=4)
+def are_you_sure():
+    """
+    Prompts the user to confirm their action.
 
-
-if 'habits' not in data:
-    data['habits'] = []
-    save_data()
+    Returns:
+        str: 'y' if the user confirms, 'n' otherwise.
+    """
+    while True:
+        user_input = input(
+            'Are you sure? (Y/N) ')
+        user_input = user_input.lower()
+        choice = None
+        if user_input == 'y':
+            choice = True
+            return choice
+        
+        elif user_input == 'n':
+            choice = False
+            return choice
+        else:
+            print('Didn\'t get that... Please try again...')
 
 
 def get_continue_choice():
@@ -124,7 +144,36 @@ def statistics():
     total_habits = len(data['habits'])
     print(f'Total Habits: {total_habits}')
 
+def delete_habit():
+    """
+    Deletes a habit from the list.
 
+    Prompts the user to enter a habit name to delete.
+    Checks if the habit exists in the list.
+    If found, removes the habit and saves the updated list to the JSON file.
+    If not found, informs the user.
+    """
+    if not data['habits']:
+        print('You don\'t have any habits yet...')
+    else:
+        while True:
+            delete_input = input('Enter the habit you want to delete: ')
+            delete_input = delete_input.title().strip()
+
+            if delete_input in data['habits']:
+                are_you_sure()
+                if are_you_sure():
+                    data['habits'].remove(delete_input)
+            elif not are_you_sure():
+                print('Deletion cancelled.')
+                save_data()  # Save changes after deletion
+                print(f'Habit {delete_input} has been deleted!')
+                break
+            else:
+                print('Habit not found! ')
+                choice = get_continue_choice()
+                if choice == 'n':
+                    break
 while True:
     choice = input('''
 ===== Habit Tracker =====
