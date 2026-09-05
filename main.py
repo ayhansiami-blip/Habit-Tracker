@@ -28,7 +28,7 @@ def are_you_sure():
     Prompts the user to confirm their action.
 
     Returns:
-        str: 'y' if the user confirms, 'n' otherwise.
+        bool: True if the user confirms, False otherwise.
     """
     while True:
         user_input = input(
@@ -51,16 +51,16 @@ def get_continue_choice():
     Prompts the user to decide whether to continue or not.
 
     Returns:
-        str: 'y' if the user wants to continue, 'n' otherwise.
+        bool: True if the user wants to continue, False otherwise.
     """
     while True:
         user_input = input(
             'Would you like to continue? (Y/N) ')
         user_input = user_input.lower()
         if user_input == 'y':
-            return user_input
+            return True
         elif user_input == 'n':
-            return user_input
+            return False
         else:
             print('Didn\'t get that... Please try again...')
 
@@ -126,12 +126,12 @@ def search_habit():
             if search_input in data['habits']:
                 print(f'Habit {search_input} found! ')
                 choice = get_continue_choice()
-                if choice == 'n':
+                if choice == False:
                     break
             else:
                 print('Habit not found! ')
                 choice = get_continue_choice()
-                if choice == 'n':
+                if choice == False:
                     break
 
 
@@ -161,18 +161,21 @@ def delete_habit():
             delete_input = delete_input.title().strip()
 
             if delete_input in data['habits']:
-                are_you_sure()
-                if are_you_sure():
+                result_are_you_sure = are_you_sure()
+                if result_are_you_sure:
                     data['habits'].remove(delete_input)
-            elif not are_you_sure():
-                print('Deletion cancelled.')
-                save_data()  # Save changes after deletion
-                print(f'Habit {delete_input} has been deleted!')
-                break
+                    save_data()  # Save changes after deletion
+                    print(f'Habit {delete_input} has been deleted! ')
+                elif result_are_you_sure == False:
+                    print('Deletion cancelled.')
+                choice = get_continue_choice()
+                if choice == False:
+                    break
+
             else:
                 print('Habit not found! ')
                 choice = get_continue_choice()
-                if choice == 'n':
+                if choice == False:
                     break
 while True:
     choice = input('''
@@ -182,7 +185,8 @@ while True:
 2. View Habits
 3. Search Habit
 4. Statistics
-5. Exit
+5. Delete Habit
+6. Exit
 
 Choose an option: ''')
     if choice == '1':
@@ -200,6 +204,9 @@ Choose an option: ''')
         print('<< Statistics >>')
         statistics()
     elif choice == '5':
+        print('<< Delete Habit >>')
+        delete_habit()
+    elif choice == '6':
         print('<< Exit >>')
         print('Thank you for using my program :) ')
         break
