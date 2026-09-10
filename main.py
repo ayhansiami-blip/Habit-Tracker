@@ -12,15 +12,32 @@ except FileNotFoundError:
     data = {}
     data["habits"] = []
 
-def save_data(habit_name=None):
+def main_menu():
+    """
+    Asks the user whether they want to return to the main menu.
+
+    Returns:
+        bool: True if the user chooses yes, False if they choose no.
+    """
+    while True:
+
+        user_input = input('Do you wish to return to the main menu? (Y/N) ').lower().strip()
+        if user_input == 'y':
+            return True
+        elif user_input == 'n':
+            return False
+        else:
+            print('Didn\'t get that... Please try agian...')
+
+def save_data(habit=None):
     """
     Saves data to the JSON file.
 
     If a habit name is provided, it appends the habit to the list.
     Writes the updated data dictionary to the file.
     """
-    if habit_name:
-        data['habits'].append(habit_name)
+    if habit:
+        data['habits'].append(habit)
     with open(file_path, "w", encoding="utf-8") as file:
         json.dump(data, file, indent=4)
 def are_you_sure():
@@ -67,30 +84,80 @@ def get_continue_choice():
 
 def add_habit():
     """
-    Adds a new habit to the list.
+    Prompts the user to enter and validate a new habit name.
 
-    Prompts the user to enter a habit name.
-    Validates the input (not empty, length between 3 and 30 characters).
-    Prevents duplicate habits by checking the existing list.
-    Saves the new habit to the JSON file if valid.
+    Prevents duplicate habits, asks for confirmation before adding,
+    optionally collects and confirms a note, and saves the completed
+    habit dictionary to the JSON file.
+
+    Returns:
+        None
     """
     while True:
-        habit_name = input('Enter Habit Name: ')
-        habit_name = habit_name.title().strip()
+        habit_name = input('Enter Habit Name: ').title().strip()
+
         if habit_name == '':
             print('Your habit name cannot be empty...')
-        elif len(habit_name) < 3:
+            continue
+
+        if len(habit_name) < 3:
             print('Your habit name cannot be less then 3 chracters...')
-        elif len(habit_name) > 30:
+            continue
+
+        if len(habit_name) > 30:
             print('Your habit name cannot be more then 30 charaters...')
-        else:
-            if habit_name in data['habits']:
-                print(
-                    'This habit already exists! Please enter a different habit name.')
-            else:
-                save_data(habit_name)
-                print(f'Habit {habit_name} has been added!')
+            continue
+
+        if habit_name.isdigit():
+            print('Your habit name cannot be a number...')
+            continue
+
+        habit_exists = False
+
+        for habit in data["habits"]:
+            if habit_name == habit["name"]:
+                habit_exists = True
                 break
+        if habit_exists:
+            print("This habit already exists. Please enter a different name.")
+            continue
+
+        if not are_you_sure():
+            print("Adding habit cancelled.")
+            return
+
+        note = ""
+        add_note = input("Would you like to add a note for this habit? (Y/N): ").lower().strip()
+        if add_note == 'y':
+            while True:
+                note = input("Enter the note for this habit: ").strip()
+                print(f'This note: " {note} " is going to be added to {habit_name} habit, ')
+                if are_you_sure():
+                    print('Note has been added successfully...')
+                    break
+                else:
+                    note_choice = input('''1. Change Note
+2. Delete Note
+What would you like to do? ''')
+                    if note_choice == '1':
+                        continue
+                    elif note_choice == '2':
+                        print('Deleting note...')
+                        note = ""
+                        main_menu_choice = main_menu()
+                        if main_menu_choice:
+                            return
+                        
+                    else:
+                        print('Didn\'t get that... Please try again...')
+        new_habit = {
+            "name": habit_name,
+            "completed": False,
+            "streak": 0,
+            "note": note
+        }
+        save_data(new_habit)
+        break
 
 
 def view_habits():
@@ -212,3 +279,4 @@ Choose an option: ''')
         break
     else:
         print('Invalid choice! Please try again...')
+print('-----------------------------------')

@@ -222,3 +222,5 @@ habits.json
 
 #Notes
 Note.txt
+
+__pycache__
