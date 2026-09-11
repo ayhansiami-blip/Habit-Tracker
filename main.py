@@ -155,23 +155,30 @@ What would you like to do? ''')
             "completed": False,
             "streak": 0,
             "note": note
-        }
+        } # Information format
         save_data(new_habit)
         break
 
 
 def view_habits():
     """
-    Displays all habits in the list.
+    Displays all saved habits with their names, completion status,
+    streak values, and notes.
 
-    If the list is empty, notifies the user.
-    Otherwise, displays all habits with their index numbers.
+    If no habits exist, informs the user that the habit list is empty.
+
+    Returns:
+        None
     """
-    if not data['habits']:
-        print('No habit found...')
+    if not data["habits"]:
+        print("No habits found...")
+        return
     else:
         for number, habit in enumerate(data["habits"], start=1):
-            print(f'{number}: {habit}')
+            print(f"{number}: {habit['name']}")
+            print(f"Completed: {habit['completed']}")
+            print(f"Streak: {habit['streak']}")
+            print(f"Note: {habit['note']}")
 
 
 def search_habit():
