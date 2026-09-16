@@ -178,7 +178,7 @@ def view_habits():
             print(f"{number}: {habit['name']}")
             print(f"Completed: {habit['completed']}")
             print(f"Streak: {habit['streak']}")
-            print(f"Note: {habit['note']}")
+            print(f"Notes: {habit['note']}")
 
 
 def search_habit():
@@ -197,17 +197,32 @@ def search_habit():
             search_input = input('Enter your habit: ')
             search_input = search_input.title().strip()
 
-            if search_input in data['habits']:
-                print(f'Habit {search_input} found! ')
-                choice = get_continue_choice()
-                if choice == False:
-                    break
-            else:
-                print('Habit not found! ')
-                choice = get_continue_choice()
-                if choice == False:
+            found = False
+
+            for habit in data["habits"]:
+                if search_input == habit["name"]:
+                    found = True
                     break
 
+                elif not search_input == habit["name"]: 
+                    found = False
+
+            if found:
+                print(f'Habit {search_input} found!: ')
+                print('-------------------------------------')
+                print(f'Habit Name: {habit['name']} ')
+                print(f'Completed: {habit['completed']}')
+                print(f'Streak: {habit['streak']}')
+                print(f'Notes: {habit['note']}')
+                print('-------------------------------------')
+                choice = get_continue_choice()
+                if not choice:
+                    return
+            else:
+                print('Habit not found')
+                choice = get_continue_choice()
+                if not choice:
+                    return
 
 def statistics():
     """
@@ -274,16 +289,20 @@ Choose an option: ''')
     elif choice == '3':
         print('<< Search Habit >>')
         search_habit()
+
     elif choice == '4':
         print('<< Statistics >>')
         statistics()
+
     elif choice == '5':
         print('<< Delete Habit >>')
         delete_habit()
+
     elif choice == '6':
         print('<< Exit >>')
         print('Thank you for using my program :) ')
         break
+
     else:
         print('Invalid choice! Please try again...')
 print('-----------------------------------')
