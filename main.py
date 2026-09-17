@@ -1,4 +1,12 @@
+from datetime import date
+
+today = date.today()
+
+print(today)
+
+
 import json
+
 file_path = "habits.json"
 try:
     with open(file_path, "r", encoding="utf-8") as file:
@@ -29,17 +37,21 @@ def main_menu():
         else:
             print('Didn\'t get that... Please try agian...')
 
-def save_data(habit=None):
+def save_data():
     """
-    Saves data to the JSON file.
+    Saves the current habit data to the JSON file.
 
-    If a habit name is provided, it appends the habit to the list.
-    Writes the updated data dictionary to the file.
+    Opens the JSON file in write mode and writes the current
+    data dictionary to it with UTF-8 encoding and indentation
+    for better readability.
+
+    Returns:
+        None
     """
-    if habit:
-        data['habits'].append(habit)
     with open(file_path, "w", encoding="utf-8") as file:
         json.dump(data, file, indent=4)
+
+
 def are_you_sure():
     """
     Prompts the user to confirm their action.
@@ -97,19 +109,19 @@ def add_habit():
         habit_name = input('Enter Habit Name: ').title().strip()
 
         if habit_name == '':
-            print('Your habit name cannot be empty...')
+            print('Your habit name cannot be empty.')
             continue
 
         if len(habit_name) < 3:
-            print('Your habit name cannot be less then 3 chracters...')
+            print('Your habit name cannot be less then 3 chracters.')
             continue
 
         if len(habit_name) > 30:
-            print('Your habit name cannot be more then 30 charaters...')
+            print('Your habit name cannot be more then 30 charaters.')
             continue
 
-        if habit_name.isdigit():
-            print('Your habit name cannot be a number...')
+        if habit_name.isalnum() and habit_name.isdigit():
+            print("Habit name cannot be only numbers.")
             continue
 
         habit_exists = False
@@ -128,35 +140,53 @@ def add_habit():
 
         note = ""
         add_note = input("Would you like to add a note for this habit? (Y/N): ").lower().strip()
+
         if add_note == 'y':
             while True:
                 note = input("Enter the note for this habit: ").strip()
-                print(f'This note: " {note} " is going to be added to {habit_name} habit, ')
+                print(f"""This note:
+" {note} " ,
+ is going to be added to " {habit_name} " habit,""")
                 if are_you_sure():
                     print('Note has been added successfully...')
                     break
                 else:
-                    note_choice = input('''1. Change Note
+                    while True:
+                        note_choice = input('''1. Change Note
 2. Delete Note
 What would you like to do? ''')
-                    if note_choice == '1':
-                        continue
-                    elif note_choice == '2':
-                        print('Deleting note...')
-                        note = ""
-                        main_menu_choice = main_menu()
-                        if main_menu_choice:
-                            return
-                        
-                    else:
-                        print('Didn\'t get that... Please try again...')
+                        if note_choice == '1':
+                            break
+
+                        elif note_choice == '2':
+                            print('Deleting note...')
+                            note = ""
+
+                            if main_menu():
+                                return
+
+                            break
+
+                        else:
+                            print('Didn\'t get that... Please enter 1 or 2.')
+
+                            
+        elif add_note == 'n':
+            pass
+
+        else:
+            print('Invalid choice! Please try again...')
+            continue
         new_habit = {
             "name": habit_name,
             "completed": False,
+            "last completed": None,
             "streak": 0,
             "note": note
         } # Information format
-        save_data(new_habit)
+        data["habits"].append(new_habit)
+        save_data()
+        print('Habit saved successfully.')
         break
 
 
@@ -175,11 +205,12 @@ def view_habits():
         return
     else:
         for number, habit in enumerate(data["habits"], start=1):
+            print('-------------------------------------')
             print(f"{number}: {habit['name']}")
             print(f"Completed: {habit['completed']}")
             print(f"Streak: {habit['streak']}")
             print(f"Notes: {habit['note']}")
-
+            print('-------------------------------------')
 
 def search_habit():
     """
@@ -204,16 +235,14 @@ def search_habit():
                     found = True
                     break
 
-                elif not search_input == habit["name"]: 
-                    found = False
 
             if found:
                 print(f'Habit {search_input} found!: ')
                 print('-------------------------------------')
-                print(f'Habit Name: {habit['name']} ')
-                print(f'Completed: {habit['completed']}')
-                print(f'Streak: {habit['streak']}')
-                print(f'Notes: {habit['note']}')
+                print(f'Habit Name: {habit["name"]} ')
+                print(f'Completed: {habit["completed"]}')
+                print(f'Streak: {habit["streak"]}')
+                print(f'Notes: {habit["note"]}')
                 print('-------------------------------------')
                 choice = get_continue_choice()
                 if not choice:
@@ -246,36 +275,64 @@ def delete_habit():
         print('You don\'t have any habits yet...')
     else:
         while True:
-            delete_input = input('Enter the habit you want to delete: ')
+            delete_input = input('Enter your habit: ')
             delete_input = delete_input.title().strip()
 
-            if delete_input in data['habits']:
-                result_are_you_sure = are_you_sure()
-                if result_are_you_sure:
-                    data['habits'].remove(delete_input)
-                    save_data()  # Save changes after deletion
-                    print(f'Habit {delete_input} has been deleted! ')
-                elif result_are_you_sure == False:
-                    print('Deletion cancelled.')
-                choice = get_continue_choice()
-                if choice == False:
+            found = False
+
+            for habit in data["habits"]:
+                if delete_input == habit["name"]:
+                    found = True
                     break
+
+
+            if found:
+                choice = are_you_sure()
+                if choice:
+                    data["habits"].remove(habit)
+                    save_data()
+                    choice3 = get_continue_choice()
+                    if choice3:
+                        continue
+                    else:
+                        return
+                    
+                else:
+                    print('Deletion cancelled; What do you want to do?')
+                    choice2 = get_continue_choice()
+                    if choice2:
+                        continue
+                    else:
+                        return
 
             else:
                 print('Habit not found! ')
-                choice = get_continue_choice()
-                if choice == False:
-                    break
+                choice4 = get_continue_choice()
+                if choice4:
+                    pass
+                else:
+                    print('Going back to main menu...')
+                    return
+                    
 while True:
-    choice = input('''
-===== Habit Tracker =====
+    choice = input(f'''
+======== Habit Tracker ========
+
+Date: {today}
 
 1. Add Habit
+
 2. View Habits
+
 3. Search Habit
+
 4. Statistics
+
 5. Delete Habit
+
 6. Exit
+
+
 
 Choose an option: ''')
     if choice == '1':
