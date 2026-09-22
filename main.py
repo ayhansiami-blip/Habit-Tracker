@@ -1,8 +1,6 @@
-from datetime import date
+from datetime import date, timedelta
 
 today = date.today()
-
-print(today)
 
 
 import json
@@ -11,6 +9,19 @@ file_path = "habits.json"
 try:
     with open(file_path, "r", encoding="utf-8") as file:
         data = json.load(file)
+
+
+    for habit in data["habits"]:
+        if habit["last completed"]:
+            last_completed = date.fromisoformat(habit["last completed"])
+
+            if not last_completed == today:
+                habit["completed"] = False
+
+            else:
+                habit["completed"] = True
+
+
 except json.JSONDecodeError:
     print("The data file is corrupted. Starting with an empty habit list...")
     data = {}
@@ -36,6 +47,26 @@ def main_menu():
             return False
         else:
             print('Didn\'t get that... Please try agian...')
+
+
+
+def update_streak(habit):
+    if habit["last completed"] is None:
+        habit["streak"] = 1
+        return
+
+    last_completed = date.fromisoformat(habit["last completed"])
+    yesterday = today - timedelta(days=1)
+
+    if last_completed == today:
+        return
+
+    elif last_completed == yesterday:
+        habit["streak"] += 1
+        return
+
+    else:
+        habit["streak"] = 1
 
 def save_data():
     """
@@ -313,28 +344,105 @@ def delete_habit():
                 else:
                     print('Going back to main menu...')
                     return
+
+
+def tick_habit():
+    if not data["habits"]:
+            print("No habits found...")
+            return
+
+
+
+    while True:
+
+        print("\n======== Tick Habit ========\n")
+        for number, habit in enumerate(data["habits"], start=1):
                     
+                    if habit['completed'] == True:
+                        completed = '[✓]'
+                    else:
+                        completed = '[ ]'
+
+                    print(
+                        f"\n{number}: {habit['name']}    "
+                        f"{completed}    "
+                        f"Streak: {habit['streak']}"
+                    )
+        print("\n0: Back")
+
+        while True:
+            choice = input("\nChoose a habit: ").strip()
+
+            if choice == "0":
+                if are_you_sure():
+                    return
+                else:
+                    continue
+
+            if not choice.isdigit():
+                print("Please enter a number.")
+                continue
+
+            choice = int(choice)
+
+            if choice < 1 or choice > len(data["habits"]):
+                print("Invalid habit number.")
+                continue
+
+            break
+
+
+        selected_habit = data["habits"][choice -1]
+
+
+        print(f"\nYou selected: {selected_habit['name']}")
+        print(f"Completed: {selected_habit['completed']}")
+        print(f"Streak: {selected_habit['streak']}")
+        if selected_habit["note"]:
+            print(f"Notes: {selected_habit['note']}")
+
+        else:
+            print("Notes: Empty...")
+
+        if not are_you_sure():
+            print("Tick cancelled.")
+            continue
+
+        update_streak(selected_habit)
+        
+        selected_habit["completed"] = True
+        selected_habit["last completed"] = str(today)
+
+        save_data()
+
+        print(f"\n✓ {selected_habit['name']} has been ticked!")               
+
+
+
 while True:
     choice = input(f'''
 ======== Habit Tracker ========
 
 Date: {today}
 
-1. Add Habit
+        1. Add Habit
 
-2. View Habits
+        2. View Habits
 
-3. Search Habit
+        3. Search Habit
 
-4. Statistics
+        4. Statistics
 
-5. Delete Habit
+        5. Delete Habit
 
-6. Exit
+        6. Tick Habit
+
+        7. Exit
 
 
 
 Choose an option: ''')
+    
     if choice == '1':
         print('<< Add Habit >>')
         add_habit()
@@ -356,6 +464,10 @@ Choose an option: ''')
         delete_habit()
 
     elif choice == '6':
+        print('<< Tick Habit >>')
+        tick_habit()
+
+    elif choice == '7':
         print('<< Exit >>')
         print('Thank you for using my program :) ')
         break
