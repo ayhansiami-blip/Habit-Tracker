@@ -10,6 +10,37 @@ try:
     with open(file_path, "r", encoding="utf-8") as file:
         data = json.load(file)
 
+    #Fixing "JSON" file's missing parts
+    fixed = False
+    for habit in data["habits"]:
+        if "name" not in habit:
+            print("\nhabits.json contains a habit with missing information(name). Please check the file.\n")
+            habit["name"] = "Unknown!!!"
+            fixed = True
+
+        if "streak" not in habit:
+            habit["streak"] = 0
+            fixed = True
+
+        if "completed" not in habit:
+            habit["completed"] = False
+            fixed = True
+
+        if "last completed" not in habit:
+            habit["last completed"] = None
+            fixed = True
+
+        if "note" not in habit:
+            habit["note"] = ""
+            fixed = True
+
+        with open(file_path, "w", encoding="utf-8") as file:
+                json.dump(data, file, indent=4)
+                
+    if fixed:
+        print("\nFixed file's missing parts!\n")
+
+
 
     for habit in data["habits"]:
         if habit["last completed"]:
@@ -26,10 +57,12 @@ except json.JSONDecodeError:
     print("The data file is corrupted. Starting with an empty habit list...")
     data = {}
     data["habits"] = []
+
 except FileNotFoundError:
     print("The data file does not exist. Starting with an empty habit list...")
     data = {}
     data["habits"] = []
+
 
 def main_menu():
     """
@@ -358,7 +391,7 @@ def tick_habit():
         print("\n======== Tick Habit ========\n")
         for number, habit in enumerate(data["habits"], start=1):
                     
-                    if habit['completed'] == True:
+                    if habit['completed']:
                         completed = '[✓]'
                     else:
                         completed = '[ ]'
@@ -394,6 +427,10 @@ def tick_habit():
 
         selected_habit = data["habits"][choice -1]
 
+        if selected_habit['completed']:
+            print('This habit is already completed...')
+            
+            continue
 
         print(f"\nYou selected: {selected_habit['name']}")
         print(f"Completed: {selected_habit['completed']}")
